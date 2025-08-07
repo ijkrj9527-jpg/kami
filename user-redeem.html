@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡密兑换 - 卡密兑换系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #fff;
+            color: #333;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 32px;
+            border-left: 4px solid #007bff;
+        }
+
+        .info-section h4 {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .info-section p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .search-section {
+            background: #fff;
+            padding: 32px;
+            border-radius: 6px;
+            margin-bottom: 32px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .search-section h3 {
+            margin-bottom: 24px;
+            color: #1a1a1a;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn:active {
+            background: #004085;
+        }
+
+        .result-section {
+            background: white;
+            padding: 24px;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .result-header h3 {
+            font-size: 20px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-header p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .result-header .note {
+            color: #007bff;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .cards-container {
+            display: grid;
+            gap: 16px;
+        }
+
+        .card-item {
+            background: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            position: relative;
+            border: 1px solid #e8e8e8;
+            transition: border-color 0.2s ease;
+        }
+
+        .card-item:hover {
+            border-color: #007bff;
+        }
+
+        .card-item.used {
+            background: #f8f9fa;
+            opacity: 0.8;
+        }
+
+        .card-status {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .card-status.used {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .card-info {
+            margin-bottom: 16px;
+        }
+
+        .card-info h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .card-info p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .card-duration {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .card-key {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 12px 0;
+            word-break: break-all;
+            border: 1px solid #e8e8e8;
+            color: #1a1a1a;
+        }
+
+        .copy-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            margin-top: 8px;
+            margin-right: 8px;
+        }
+
+        .copy-btn:hover {
+            background: #5a6268;
+        }
+
+        .copy-btn.redeem {
+            background: #28a745;
+        }
+
+        .copy-btn.redeem:hover {
+            background: #218838;
+        }
+
+        .copy-btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 24px;
+            gap: 8px;
+        }
+
+        .pagination-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #666;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        .pagination-btn.active {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            background: #f8f9fa;
+            border-color: #e9ecef;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: #666;
+            font-size: 13px;
+            margin: 0 16px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 6px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 24px 20px;
+            }
+            
+            .search-section {
+                padding: 24px 20px;
+            }
+            
+            .card-item {
+                padding: 16px;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>卡密兑换</h1>
+            <p>已购买云手机免费兑换脚本卡密</p>
+        </div>
+
+        <div class="content">
+            <div class="info-section">
+                <h4>使用说明</h4>
+                <p>请输入您的手机号进行兑换。如果您有多个订单，系统将显示所有相关的卡密信息。每个卡密只能兑换一次，请妥善保管。</p>
+            </div>
+
+            <div class="search-section">
+                <h3>卡密兑换</h3>
+                <form id="redeemForm">
+                    <div class="form-group">
+                        <label for="searchPhone">手机号</label>
+                        <input type="tel" id="searchPhone" name="searchPhone" placeholder="请输入您的手机号" required>
+                    </div>
+                    <button type="submit" class="btn">确认兑换</button>
+                </form>
+            </div>
+
+            <div id="resultSection" class="result-section">
+                <div class="result-header">
+                    <h3>查询结果</h3>
+                    <p>以下是您的卡密信息</p>
+                    <p class="note">根据您购买的云手机时长兑换相应时长的卡密。</p>
+                </div>
+                <div id="cardsContainer" class="cards-container">
+                    <!-- 卡密卡片将通过JavaScript动态添加 -->
+                </div>
+                <div id="pagination" class="pagination" style="display: none;">
+                    <!-- 分页控件将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储卡密数据
+        let cardData = JSON.parse(localStorage.getItem('cardData')) || [];
+        let usedCards = JSON.parse(localStorage.getItem('usedCards')) || [];
+        let currentPage = 1;
+        let cardsPerPage = 10;
+        let currentCards = [];
+
+        // 兑换表单提交
+        document.getElementById('redeemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const searchPhone = document.getElementById('searchPhone').value.trim();
+            
+            if (!searchPhone) {
+                showAlert('请输入手机号！', 'error');
+                return;
+            }
+            
+            // 查找匹配的卡密
+            const matchedCards = cardData.filter(card => card.phone === searchPhone);
+            
+            if (matchedCards.length === 0) {
+                showAlert('抱歉！未找到该手机号对应的卡密信息！\n（如您是在晚间购买，管理员可能还未将卡密录入系统，可联系管理员。）', 'error');
+                return;
+            }
+            
+            // 排序：未使用的在前
+            matchedCards.sort((a, b) => {
+                if (a.status === '已使用' && b.status !== '已使用') return 1;
+                if (a.status !== '已使用' && b.status === '已使用') return -1;
+                return 0;
+            });
+            
+            currentCards = matchedCards;
+            currentPage = 1;
+            
+            // 显示卡密
+            displayCards();
+            document.getElementById('resultSection').classList.add('show');
+            
+            // 滚动到结果区域
+            document.getElementById('resultSection').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        });
+
+        // 显示卡密卡片
+        function displayCards() {
+            const container = document.getElementById('cardsContainer');
+            const pagination = document.getElementById('pagination');
+            
+            // 计算分页
+            const startIndex = (currentPage - 1) * cardsPerPage;
+            const endIndex = startIndex + cardsPerPage;
+            const pageCards = currentCards.slice(startIndex, endIndex);
+            
+            container.innerHTML = '';
+            
+            pageCards.forEach((card, index) => {
+                const isUsed = card.status === '已使用';
+                const cardElement = document.createElement('div');
+                cardElement.className = `card-item ${isUsed ? 'used' : ''}`;
+                
+                cardElement.innerHTML = `
+                    <div class="card-status ${isUsed ? 'used' : 'available'}">
+                        ${isUsed ? '已兑换' : '可兑换'}
+                    </div>
+                    <div class="card-info">
+                        <h4>卡密 #${startIndex + index + 1}</h4>
+                        <p>用户UID: ${card.uid} | 云手机编号: ${card.cloudPhone}</p>
+                        <p>创建时间: ${card.createTime}</p>
+                        ${card.duration ? `<p class="card-duration">时长: ${card.duration}</p>` : ''}
+                        ${isUsed ? `<p>兑换时间: ${card.useTime}</p>` : ''}
+                    </div>
+                    <div class="card-key" id="cardKey${card.id}">${card.cardKey}</div>
+                    ${!isUsed ? `<button class="copy-btn" onclick="copyCardKey(${card.id})">复制卡密</button>` : ''}
+                    ${!isUsed ? `<button class="copy-btn redeem" onclick="redeemCard(${card.id})">确认兑换</button>` : ''}
+                `;
+                
+                container.appendChild(cardElement);
+            });
+            
+            // 显示分页
+            if (currentCards.length > cardsPerPage) {
+                displayPagination();
+                pagination.style.display = 'flex';
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+
+        // 显示分页控件
+        function displayPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(currentCards.length / cardsPerPage);
+            
+            let paginationHTML = '';
+            
+            // 上一页按钮
+            paginationHTML += `<button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+            
+            // 页码信息
+            paginationHTML += `<span class="pagination-info">第 ${currentPage} 页，共 ${totalPages} 页</span>`;
+            
+            // 下一页按钮
+            paginationHTML += `<button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一页</button>`;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // 切换页面
+        function changePage(page) {
+            const totalPages = Math.ceil(currentCards.length / cardsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayCards();
+            }
+        }
+
+        // 复制卡密
+        function copyCardKey(cardId) {
+            const cardKeyElement = document.getElementById(`cardKey${cardId}`);
+            const cardKey = cardKeyElement.textContent;
+            
+            navigator.clipboard.writeText(cardKey).then(() => {
+                showAlert('卡密已复制到剪贴板！', 'success');
+            }).catch(() => {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = cardKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert('卡密已复制到剪贴板！', 'success');
+            });
+        }
+
+        // 兑换卡密
+        function redeemCard(cardId) {
+            if (confirm('确定要兑换这个卡密吗？兑换后将无法重复使用。')) {
+                const card = cardData.find(c => c.id === cardId);
+                if (card && card.status !== '已使用') {
+                    card.status = '已使用';
+                    card.useTime = new Date().toLocaleString();
+                    usedCards.push(cardId);
+                    
+                    localStorage.setItem('cardData', JSON.stringify(cardData));
+                    localStorage.setItem('usedCards', JSON.stringify(usedCards));
+                    
+                    showAlert('卡密兑换成功！', 'success');
+                    
+                    // 重新显示卡片
+                    const searchPhone = document.getElementById('searchPhone').value.trim();
+                    const matchedCards = cardData.filter(c => c.phone === searchPhone);
+                    
+                    // 重新排序
+                    matchedCards.sort((a, b) => {
+                        if (a.status === '已使用' && b.status !== '已使用') return 1;
+                        if (a.status !== '已使用' && b.status === '已使用') return -1;
+                        return 0;
+                    });
+                    
+                    currentCards = matchedCards;
+                    displayCards();
+                }
+            }
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(alertDiv, content.firstChild);
+            
+            // 根据消息类型设置不同的显示时间
+            const displayTime = type === 'error' ? 40000 : 3000; // 错误提示显示40秒，其他提示显示3秒
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, displayTime);
+        }
+    </script>
+</body>
+</html> 
